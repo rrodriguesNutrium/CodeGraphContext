@@ -327,6 +327,14 @@ class GraphWriter:
                 for item in item_list:
                     row = dict(item)
                     row["path"] = file_path_str
+                    # Some extractors (e.g. cpp.py, css.py) already set
+                    # is_dependency on the item itself; don't override a
+                    # value a parser deliberately set. Everything else
+                    # inherits the file-level value so that
+                    # func.is_dependency = false (a strict equality check,
+                    # not NULL-tolerant) actually matches real nodes -- see
+                    # find_dead_code in code_finder.py.
+                    row.setdefault("is_dependency", is_dependency)
                     if label == "Function" and "cyclomatic_complexity" not in row:
                         row["cyclomatic_complexity"] = 1
                     sanitized, findings = sanitize_props_with_secrets(row, redact=_should_redact)
